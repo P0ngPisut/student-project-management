@@ -1,0 +1,320 @@
+# Wireframe V1 — Student / Team Leader
+
+ยืนยัน User Flow ใหม่เรียบร้อย: **ผู้ใช้สามารถสร้างทีมก่อนหรือสร้างโครงงานก่อนก็ได้** โดยไม่บังคับลำดับ และคงขอบเขต Prototype V1 เดิมทั้งหมด
+
+ต่อไปนี้เป็นข้อกำหนด Wireframe สำหรับนำไปจัดวางใน Figma ครบ 9 หน้าจอ โดยใช้ Desktop Frame ขนาด 1440 × 900 px และสไตล์ Modern Academic
+
+## 1. โครงสร้างหน้าจอร่วม (Shared Layout)
+
+<box border radius="xl" clip gap={0}>
+  <row background="#163B70" padding={3} align="center" justify="between">
+    <text color="#FFFFFF" weight="medium">Student Project Management</text>
+    <row align="center" gap={2}>
+      <icon name="bell" color="#FFFFFF"/>
+      <icon name="circle-user-round" color="#FFFFFF"/>
+    </row>
+  </row>
+  <row gap={0} align="stretch">
+    <box background="#E8F1FC" width="27%" padding={3} gap={3}>
+      <text color="#163B70" weight="semibold">เมนูหลัก</text>
+      {#each ["Dashboard","โครงงาน","ทีมของฉัน","งานและ Milestone","เอกสาร","ความคืบหน้า"] as item}
+        <row align="center" gap={2}>
+          <icon name="chevron-right" size="xs" color="#3989D6"/>
+          <text size="xs" color="#163B70">{item}</text>
+        </row>
+      {/each}
+    </box>
+    <box flex="1" background="#FFFFFF" padding={3} gap={3}>
+      <text color="#163B70" weight="semibold">ชื่อหน้าจอ</text>
+      <box background="#F1F6FC" radius="md" height="52px" padding={2}>
+        <text color="secondary" size="xs">ส่วนแสดงข้อมูลหลัก</text>
+      </box>
+      <box border radius="md" padding={3} gap={2}>
+        <box background="#E8F1FC" height="12px" radius="sm" width="75%"/>
+        <box background="#E8F1FC" height="12px" radius="sm" width="95%"/>
+        <box background="#E8F1FC" height="12px" radius="sm" width="60%"/>
+      </box>
+    </box>
+  </row>
+</box>
+
+<caption>โครงร่างร่วมสำหรับทุกหน้าจอ ไม่ใช่ภาพ UI ขั้นสุดท้าย</caption>
+
+## 2. Wireframe รายหน้าจอ
+
+<box gap={3}>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-01 Dashboard</text>
+      <grid columns={2} gap={1}>
+        {#each ["โครงงาน","งานของฉัน","Milestone","ความคืบหน้า"] as s}
+          <grid-item>
+            <box background="#FFFFFF" border radius="sm" padding={2}>
+              <text size="3xs">{s}</text>
+              <box background="#DCEBFA" height="9px" radius="sm"/>
+            </box>
+          </grid-item>
+        {/each}
+      </grid>
+      <box background="#FFFFFF" border radius="sm" padding={2} gap={1}>
+        <text size="3xs">กิจกรรมล่าสุด</text>
+        <box background="#E8F1FC" height="8px"/>
+        <box background="#E8F1FC" height="8px"/>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-01 — Dashboard**
+
+      แสดงภาพรวมโครงงาน งานที่ได้รับมอบหมาย กำหนดส่ง และความคืบหน้า
+
+      **ปุ่มสำคัญ:** `สร้างทีม` และ `สร้างโครงงาน` แสดงแยกจากกัน โดยกดเริ่มจากปุ่มใดก่อนก็ได้
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-02 Team Creation</text>
+      {#each ["ชื่อทีม","รายละเอียดทีม","สมาชิกทีม"] as s}
+        <box gap={1}>
+          <text size="3xs">{s}</text>
+          <box background="#FFFFFF" border radius="sm" height="22px"/>
+        </box>
+      {/each}
+      <box background="#163B70" radius="sm" padding={2} align="center">
+        <text size="3xs" color="#FFFFFF">สร้างทีม</text>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-02 — สร้างทีม**
+
+      แบบฟอร์มสร้างทีม พร้อมส่วนเพิ่มสมาชิก
+
+      **การเชื่อมต่อ:** กดสร้างทีมแล้วไป ST-03 โดยไม่บังคับว่าต้องมีโครงงานอยู่ก่อน
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-03 Team Management</text>
+      <box background="#FFFFFF" border radius="sm" padding={2} gap={2}>
+        <text size="3xs">สมาชิกในทีม</text>
+        {#each ["หัวหน้าทีม","สมาชิก 1","สมาชิก 2"] as s}
+          <row align="center" justify="between">
+            <text size="3xs">{s}</text>
+            <icon name="user-round" size="xs" color="secondary"/>
+          </row>
+        {/each}
+      </box>
+      <box background="#DCEBFA" padding={2} radius="sm">
+        <text size="3xs" color="#163B70">+ เพิ่มสมาชิก</text>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-03 — จัดการทีม**
+
+      แสดงรายชื่อสมาชิกและหัวหน้าทีม พร้อมการเพิ่มสมาชิก
+
+      ยังไม่ใส่ปุ่มลบสมาชิก เพราะสิทธิ์ดังกล่าวยังไม่ได้รับการยืนยัน
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-04 Project Creation</text>
+      {#each ["ชื่อโครงงาน","รายละเอียดโครงงาน","ทีมที่เกี่ยวข้อง (ถ้ามี)"] as s}
+        <box gap={1}>
+          <text size="3xs">{s}</text>
+          <box background="#FFFFFF" border radius="sm" height="22px"/>
+        </box>
+      {/each}
+      <box background="#163B70" radius="sm" padding={2} align="center">
+        <text size="3xs" color="#FFFFFF">สร้างโครงงาน</text>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-04 — สร้างโครงงาน**
+
+      แบบฟอร์มข้อมูลโครงงาน พร้อมส่วนแสดงทีมที่เกี่ยวข้องหากมีทีมแล้ว
+
+      **การเชื่อมต่อ:** สามารถสร้างโครงงานได้แม้ยังไม่มีทีม และไป ST-05 หลังสร้าง
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-05 Project Details</text>
+      <box background="#FFFFFF" border radius="sm" padding={2} gap={2}>
+        <text size="xs" weight="medium">ชื่อโครงงาน</text>
+        <text size="3xs" color="secondary">รายละเอียด / ทีม / อาจารย์ที่ปรึกษา</text>
+        <divider color="subtle"/>
+        <text size="3xs">สถานะโครงงาน</text>
+        <box background="#DCEBFA" height="12px" width="55%" radius="sm"/>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-05 — รายละเอียดโครงงาน**
+
+      แสดงข้อมูลโครงงาน ทีม อาจารย์ที่ปรึกษา และสถานะ
+
+      มีจุดนำทางไปยังการเชิญอาจารย์และส่งรายละเอียดโครงงาน
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-06 Advisor Invitation</text>
+      <box background="#FFFFFF" border radius="sm" padding={2} gap={2}>
+        <text size="3xs">เลือกอาจารย์ที่ปรึกษา</text>
+        <box border radius="sm" height="24px" padding={1}>
+          <row justify="between" align="center">
+            <text size="3xs" color="secondary">เลือกอาจารย์</text>
+            <icon name="chevron-down" size="xs"/>
+          </row>
+        </box>
+      </box>
+      <box background="#163B70" radius="sm" padding={2} align="center">
+        <text size="3xs" color="#FFFFFF">ส่งคำเชิญ</text>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-06 — เชิญอาจารย์ที่ปรึกษา**
+
+      แสดงตัวเลือกอาจารย์และปุ่มส่งคำเชิญ
+
+      ยังไม่กำหนดวิธีตอบรับคำเชิญหรือเงื่อนไขการเปลี่ยนอาจารย์
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-07 Project Submission</text>
+      <box background="#FFFFFF" border radius="sm" padding={2} gap={2}>
+        <text size="3xs">ตรวจสอบรายละเอียดก่อนส่ง</text>
+        {#each ["ข้อมูลโครงงาน","ทีม","อาจารย์ที่ปรึกษา"] as s}
+          <row gap={1} align="center">
+            <icon name="file-check" size="xs" color="#3989D6"/>
+            <text size="3xs">{s}</text>
+          </row>
+        {/each}
+      </box>
+      <box background="#163B70" radius="sm" padding={2} align="center">
+        <text color="#FFFFFF" size="3xs">ยืนยันส่งโครงงาน</text>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-07 — ส่งรายละเอียดโครงงาน**
+
+      หน้าตรวจสอบข้อมูลก่อนส่งให้อาจารย์
+
+      ยังไม่กำหนดเงื่อนไขว่าข้อมูลใดต้องครบก่อนส่ง เพราะต้องยืนยันเพิ่มเติม
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-08 Submission Status</text>
+      <box background="#FFFFFF" border radius="sm" padding={2} gap={2}>
+        <text size="3xs">สถานะการตรวจสอบ</text>
+        <box background="#DCEBFA" radius="sm" padding={2}>
+          <text size="3xs" color="#163B70">รออาจารย์ตรวจสอบ</text>
+        </box>
+        <box background="#E8F1FC" height="9px" radius="sm"/>
+        <box background="#E8F1FC" height="9px" width="75%" radius="sm"/>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-08 — สถานะการส่งโครงงาน**
+
+      แสดงสถานะรอตรวจสอบ อนุมัติ หรือขอแก้ไข
+
+      สถานะอนุมัติจะสะท้อนขั้นตอนส่งต่อผู้ประสานงานรายวิชา
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <box background="surface-secondary" radius="lg" padding={3} width="42%" gap={2}>
+      <text weight="semibold" color="#163B70">ST-09 Project Revision</text>
+      <box background="#FFFFFF" border radius="sm" padding={2} gap={2}>
+        <text size="3xs">ข้อเสนอแนะจากอาจารย์</text>
+        <box background="#E8F1FC" radius="sm" padding={2}>
+          <text size="3xs" color="secondary">ข้อความขอแก้ไข...</text>
+        </box>
+        <box border radius="sm" height="35px" padding={2}>
+          <text size="3xs" color="secondary">แก้ไขรายละเอียด...</text>
+        </box>
+      </box>
+      <box background="#163B70" radius="sm" padding={2} align="center">
+        <text color="#FFFFFF" size="3xs">ส่งใหม่</text>
+      </box>
+    </box>
+    <box flex="1" gap={2}>
+      **ST-09 — แก้ไขโครงงาน**
+
+      แสดงข้อเสนอแนะจากอาจารย์และพื้นที่แก้ไขรายละเอียด
+
+      เมื่อส่งใหม่จะกลับไปยัง ST-08
+    </box>
+  </row>
+</box>
+
+## 3. การเชื่อมต่อ Prototype
+
+<box border radius="lg" padding={3} gap={2}>
+  <box background="#163B70" radius="md" padding={3} align="center">
+    <text color="#FFFFFF" weight="medium">ST-01 Dashboard</text>
+  </box>
+  <grid columns={2} gap={2}>
+    <grid-item>
+      <box gap={2} align="center">
+        <icon name="arrow-down"/>
+        <box background="#E8F1FC" radius="md" padding={3} width="100%" align="center">
+          **ST-02**
+          <text size="xs">สร้างทีม</text>
+        </box>
+        <icon name="arrow-down"/>
+        <box border radius="md" padding={3} width="100%" align="center">
+          **ST-03**
+          <text size="xs">จัดการทีม</text>
+        </box>
+      </box>
+    </grid-item>
+    <grid-item>
+      <box gap={2} align="center">
+        <icon name="arrow-down"/>
+        <box background="#E8F1FC" radius="md" padding={3} width="100%" align="center">
+          **ST-04**
+          <text size="xs">สร้างโครงงาน</text>
+        </box>
+        <icon name="arrow-down"/>
+        <box border radius="md" padding={3} width="100%" align="center">
+          **ST-05**
+          <text size="xs">รายละเอียดโครงงาน</text>
+        </box>
+      </box>
+    </grid-item>
+  </grid>
+  <text size="xs" color="secondary" textAlign="center">ทั้งสองเส้นทางเริ่มได้อย่างอิสระ และเชื่อมไปจัดการข้อมูลที่เกี่ยวข้องได้</text>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#E8F1FC" radius="md" padding={3} align="center">
+    **ST-06 → ST-07 → ST-08**
+    <text size="xs">เชิญอาจารย์ → ส่งโครงงาน → ติดตามสถานะ</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box border radius="md" padding={3} align="center">
+    **ST-09 (กรณีขอแก้ไข)**
+    <text size="xs">แก้ไขและส่งใหม่ → ST-08</text>
+  </box>
+</box>
+
+## 4. ผลลัพธ์และขั้นตอนถัดไป
+
+<row align="center" gap={2}>
+  <icon name="check-circle-2" color="success"/>
+  **กำหนด Wireframe V1 ครบ 9 หน้าจอแล้ว**
+</row>
+
+ขณะนี้ได้โครงสร้างเนื้อหา การจัดวาง และเส้นทางเชื่อมหน้าจอเบื้องต้นสำหรับ Student / Team Leader แล้ว โดยยังไม่ใช่ไฟล์ Figma จริง
+
+**ขั้นตอนถัดไป:** ออกแบบ High-Fidelity UI ของทั้ง 9 หน้าจอในธีม Modern Academic ก่อนเชื่อมเป็น Clickable Prototype
+
+ส่วนที่ยังไม่ชัดเจน เช่น วิธีเชื่อมทีมเข้ากับโครงงานที่สร้างแยกกัน และเงื่อนไขการส่งโครงงาน จะยังไม่กำหนดพฤติกรรมเพิ่มเติมจนกว่าจะได้รับการยืนยัน

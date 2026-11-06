@@ -1,0 +1,35 @@
+ไฟล์หลักที่ผมหมายถึงคือ **`Database_Schema_V1_Data_Dictionary.md`** ครับ แต่ต้องชี้แจงว่าไฟล์นี้ **ยังไม่ใช่ฉบับที่รวมข้อกำหนดล่าสุดครบ 100%** เพราะจัดทำก่อนยืนยัน R-01 เรื่องห้ามลบ Project
+
+ตอนนี้มีไฟล์สำคัญ 3 ไฟล์ที่ Codex ควรใช้อ้างอิงร่วมกัน
+
+| ไฟล์ | เนื้อหา |
+|---|---|
+| **`Database_Schema_V1_Data_Dictionary.md`** | รายละเอียด 14 ตาราง, 86 Columns, 28 Foreign Keys และกฎ G-01 ถึง G-12, C-01 ถึง C-07, D-01 |
+| `Database_Schema_V1_A02_A05_REVIEW_DRAFT.sql` | ร่าง SQL ล่าสุด รวม R-01 = A และการแก้ปัญหา A-01 ถึง A-06 |
+| `Database_Schema_V1_A02_A05_Review_Report.md` | รายงานการแก้ไข SQL, RBAC และข้อจำกัดที่ยังต้องทดสอบ |
+
+## ดาวน์โหลดไฟล์
+
+<box border radius="lg" padding={3} gap={3}>
+  <row align="center" gap={2}>
+    <icon name="book-open" size="lg"/>
+    **1. เอกสาร Data Dictionary — ไฟล์หลัก**
+  </row>
+  [ดาวน์โหลด Database_Schema_V1_Data_Dictionary.md](sandbox:/mnt/data/Database_Schema_V1_Data_Dictionary.md)
+  <divider color="subtle"/>
+  **2. ร่าง SQL ล่าสุด**
+
+  [Database_Schema_V1_A02_A05_REVIEW_DRAFT.sql](sandbox:/mnt/data/Database_Schema_V1_A02_A05_REVIEW_DRAFT.sql)
+  <divider color="subtle"/>
+  **3. รายงานการแก้ไข**
+
+  [Database_Schema_V1_A02_A05_Review_Report.md](sandbox:/mnt/data/Database_Schema_V1_A02_A05_Review_Report.md)
+</box>
+
+จากภาพ VS Code ก่อนหน้านี้ คุณมีไฟล์ SQL ข้อ 2 อยู่แล้ว แต่ยังไม่เห็นไฟล์ Data Dictionary ใน Workspace
+
+**ขั้นตอนที่แนะนำตอนนี้:** ดาวน์โหลด `Database_Schema_V1_Data_Dictionary.md` ไปวางในโฟลเดอร์หลัก `student-project-management` เพื่อให้ Codex อ่านได้
+
+ก่อนให้ Codex ใช้เป็นเอกสารอ้างอิงฉบับสมบูรณ์ ต้องรวม **R-01 = A (ห้ามลบ Project ทุกกรณี)** เข้าไปด้วย และระบุว่าร่าง SQL ล่าสุดยังอยู่ระหว่างทดสอบ RBAC/Triggers
+
+หากคุณต้องการ ผมสามารถ **จัดทำเอกสาร Database Schema V1 ฉบับรวมล่าสุดไฟล์เดียว** สำหรับส่งต่อให้ Codex โดยรวบรวมข้อกำหนดทั้งหมดที่ยืนยันไว้ และไม่แก้ไขกฎเดิมได้

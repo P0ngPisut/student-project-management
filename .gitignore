@@ -1,0 +1,28 @@
+# Local secrets; commit only blank/example templates.
+.env*
+!.env.example
+!.env.*.example
+
+# Python environments and generated caches, at any depth.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Node / Next.js generated files.
+node_modules/
+.next/
+
+# Test outputs.
+test-results/
+playwright-report/
+.coverage
+coverage/
+
+# Database backups may contain accounts, hashes and application data.
+*.dump
+*.backup
+
+# Operating-system files.
+.DS_Store
+Thumbs.db

@@ -1,0 +1,39 @@
+<row align="center" gap={2}>
+  <icon name="check-circle" color="success" size="lg"/>
+  **FastAPI Backend เชื่อมต่อ PostgreSQL สำเร็จแล้ว**
+</row>
+
+จากภาพ VS Code ตรวจสอบได้ว่า:
+
+| รายการ | ผลการตรวจสอบ |
+|---|---|
+| สร้างไฟล์ `backend/database.py` | <icon name="check" color="success" inline/> ผ่าน |
+| โหลดค่าจาก `.env` | <icon name="check" color="success" inline/> ผ่าน |
+| SQLAlchemy + psycopg | <icon name="check" color="success" inline/> ผ่าน |
+| คำสั่ง `python database.py` | <icon name="check" color="success" inline/> ผ่าน |
+| เชื่อมต่อ PostgreSQL | <icon name="check" color="success" inline/> ผ่าน |
+
+Terminal แสดงผล:
+
+```text id="twy2mm"
+Connected to: student_project_management
+```
+
+หมายความว่า Python สามารถเชื่อมต่อฐานข้อมูล PostgreSQL ที่สร้างไว้ได้จริง
+
+## ขั้นตอนถัดไป — ทดสอบการเชื่อมต่อผ่าน FastAPI
+
+ปัจจุบัน `database.py` เชื่อมต่อฐานข้อมูลได้แล้ว แต่ยังไม่ได้ทดสอบผ่าน FastAPI
+
+ก่อนดำเนินการขั้นตอนนี้ **ขออนุญาตแก้ไขไฟล์ `backend/main.py`** เพื่อเพิ่ม Endpoint สำหรับตรวจสอบการเชื่อมต่อฐานข้อมูล โดยคง Endpoint เดิมไว้ทั้งหมด
+
+{@body const [choice,setChoice] = DIL.useState("เพิ่ม Endpoint ทดสอบการเชื่อมต่อฐานข้อมูล")}
+<box border radius="lg" padding={3} gap={3}>
+  <radio-group direction="col" value={choice} onChange={setChoice}>
+    <radio value="เพิ่ม Endpoint ทดสอบการเชื่อมต่อฐานข้อมูล">เพิ่ม Endpoint ทดสอบการเชื่อมต่อฐานข้อมูลใน `main.py`</radio>
+    <radio value="ยังไม่แก้ไข main.py และไปออกแบบ Database Schema ก่อน">ยังไม่แก้ไข `main.py` และไปออกแบบ Database Schema ก่อน</radio>
+  </radio-group>
+  <button block onClick={()=>GenUI.issueNewTurn(choice)}>ยืนยันขั้นตอนถัดไป</button>
+</box>
+
+ยังไม่สร้าง Tables และไม่แก้ไข Frontend ตามขอบเขตที่กำหนดไว้

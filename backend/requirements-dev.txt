@@ -1,0 +1,4 @@
+# Install alongside backend/requirements.txt for HTTP tests.
+httpcore2==2.16.0
+httpx2==2.16.0
+truststore==0.10.5
