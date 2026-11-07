@@ -396,7 +396,7 @@ class AuthAPIIntegrationTests(unittest.TestCase):
         self.assertIsNotNone(self.active_user(token))
         with self.conn.cursor() as cur:
             cur.execute("SELECT count(*) FROM auth.sessions")
-            self.assertEqual(cur.fetchone()[0], 1)
+            self.assertEqual(cur.fetchone()[0], self.before[1]["auth.sessions"] + 1)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,26 @@
+.backLink { display: inline-block; margin-bottom: 28px; font-size: 13px; color: #60748e; line-height: 1.8; }
+.hint, .empty { color: #66758a; font-size: 13px; line-height: 1.9; margin: 14px 0; }
+.historyHeading, .cardTop { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.historyHeading { align-items: center; margin-bottom: 14px; }
+.historyHeading h2 { color: #23354f; font-size: 16px; line-height: 1.8; }
+.textButton { background: none; border: 0; padding: 6px 0; color: #255b95; font-size: 12px; cursor: pointer; flex: none; }
+.history { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 16px; }
+.card { border: 1px solid #e0e7ef; border-radius: 12px; padding: 20px; }
+.card h3 { font-size: 15px; line-height: 1.8; color: #23354f; min-width: 0; overflow-wrap: anywhere; }
+.badge { flex: none; border-radius: 5px; padding: 3px 8px; background: #edf4fc; color: #255b95; font-size: 11px; line-height: 1.8; }
+.context { color: #60748e; font-size: 13px; line-height: 1.85; margin-top: 12px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.context p + p { margin-top: 6px; }
+.time { color: #8190a3; font-size: 11px; line-height: 1.8; margin-top: 9px; }
+.form { display: flex; flex-direction: column; gap: 20px; margin-top: 25px; }
+.field { display: flex; flex-direction: column; gap: 9px; }
+.field label { color: #34445b; font-size: 14px; line-height: 1.8; }
+.field select { width: 100%; min-width: 0; min-height: 49px; border: 1px solid #d8e0ea; border-radius: 8px; background: #fff; color: #23354f; padding: 11px 12px; font: inherit; font-size: 14px; }
+.primaryButton, .secondaryButton { width: 100%; min-height: 45px; border: 1px solid #163b70; border-radius: 8px; padding: 10px 14px; background: #163b70; color: #fff; font: inherit; font-size: 14px; line-height: 1.7; cursor: pointer; text-align: center; text-decoration: none; }
+.secondaryButton { border-color: #d8e0ea; background: #fff; color: #344a68; }
+.card > .secondaryButton { margin-top: 15px; }
+.actions { display: flex; gap: 10px; margin-top: 15px; }
+.primaryButton:disabled, .secondaryButton:disabled, .textButton:disabled, .field select:disabled { opacity: .6; cursor: wait; }
+.primaryButton:focus-visible, .secondaryButton:focus-visible, .textButton:focus-visible, .field select:focus-visible, .backLink:focus-visible { outline: 3px solid #7eb3ed; outline-offset: 3px; }
+.errorBox { margin-bottom: 20px; border: 1px solid #f0d7da; border-radius: 8px; padding: 12px 14px; background: #fff2f3; color: #9d3440; font-size: 13px; line-height: 1.85; }
+.errorBox button, .errorBox a { display: inline-block; border: 0; background: none; padding: 0; margin-top: 7px; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; }
+.notice { margin-bottom: 20px; border: 1px solid #d7eddf; border-radius: 8px; padding: 12px 14px; background: #eff9f3; color: #28714e; font-size: 13px; line-height: 1.85; }

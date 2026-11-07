@@ -38,6 +38,8 @@ export function AccountScreen() {
       <div className={styles.accountTop}><span className={styles.avatar} aria-hidden="true">{Array.from(user.full_name)[0]}</span><div><p className={styles.accountName}>{user.full_name}</p><span className={styles.roleBadge}>{ROLES[user.role]}</span></div></div>
       <dl className={styles.accountDetails}><div><dt>อีเมล</dt><dd>{user.email}</dd></div><div><dt>บทบาท</dt><dd>{ROLES[user.role]}</dd></div></dl>
     </div>
+    {user.role === "student" && <Link className={styles.secondaryButton} href="/teams">ทีมของฉัน →</Link>}
+    {user.role === "advisor" && <Link className={styles.secondaryButton} href="/advisor/invitations">คำเชิญของฉัน →</Link>}
     {error && <div className={styles.errorBox} role="alert"><p>{error}</p><Link href="/login">เข้าสู่ระบบใหม่</Link></div>}
     <button className={styles.secondaryButton} onClick={signOut} disabled={busy}>{busy ? "กำลังออกจากระบบ…" : "ออกจากระบบ"}</button>
   </AuthShell>;

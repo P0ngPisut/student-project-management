@@ -87,7 +87,10 @@ class AuthBoundaryTests(unittest.TestCase):
         with patch("psycopg.connect", side_effect=AssertionError("Unexpected DB connection")):
             app = create_app()
             self.assertEqual(set(app.openapi()["paths"]), {
-                "/", "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/me",
+                "/", "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/me", "/api/v1/teams", "/api/v1/teams/me", "/api/v1/teams/me/members",
+                "/api/v1/projects", "/api/v1/projects/me",
+                "/api/v1/projects/me/advisor-candidates", "/api/v1/projects/me/advisor-invitations", "/api/v1/advisor-invitations/me",
+                "/api/v1/advisor-invitations/{invitation_id}/cancel", "/api/v1/advisor-invitations/{invitation_id}/respond",
             })
 
     def test_user_ids_preserve_bigint_precision_as_strings(self):

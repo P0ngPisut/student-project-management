@@ -1,0 +1,3 @@
+# SQL review/install tools pin byte-for-byte SHA-256 checksums.
+# Keep checkout line endings stable even on core.autocrlf=true machines.
+database/**/*.sql text eol=lf

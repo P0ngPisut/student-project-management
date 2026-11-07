@@ -4,6 +4,10 @@
 
 ผลการติดตั้งและ smoke วันที่ 2026-11-06 ด้านล่างเป็นประวัติของรอบนั้น ผลล่าสุดของ Frontend/Me อยู่ท้ายรายงาน ไม่ได้ติดตั้ง SQL/grants ซ้ำในรอบ Frontend
 
+อัปเดตหลังรอบFrontend: [V1 baseline repairติดตั้งตามอนุมัติแล้ว](V1_BASELINE_INSTALLATION_REPORT.md) publicปัจจุบันมี52functionsเทียบกับ51ในผลติดตั้งAuthเดิม Auth definitions/grantsคงเดิม ชุดAuth65+DB40รันผ่านบนbaselineใหม่และROLLBACK P06ปิดเฉพาะscope repair ไม่รวมTeamHTTP/Concurrency
+
+งานต่อจากรายงานนี้: Frontend /teamsและGETทีมของตนเชื่อมแล้วตาม [Team Frontend Report](../progress/TEAM_FRONTEND_IMPLEMENTATION_REPORT.md) ซึ่งเป็นหลักฐานล่าสุดของTeam integration ข้อจำกัดTeam/P06ที่กล่าวในผลรอบAuthด้านล่างเป็นสถานะในรอบประวัตินั้น
+
 อ้างอิง [Auth Contract](../api/AUTH_CONTRACT.md), [Auth Design](../api/AUTH_DESIGN.md), [installer](../../database/tools/Auth_Install.py), [DB regression](../../database/tests/Auth_Regression.py) และ [HTTP tests](../../backend/tests/test_auth_api.py)
 
 ## ขอบเขตและการติดตั้ง

@@ -1,0 +1,50 @@
+.form { display: flex; flex-direction: column; gap: 22px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field label { color: #34445b; font-size: 14px; font-weight: 500; line-height: 1.8; }
+.field input, .field textarea { width: 100%; border: 1px solid #d8e0ea; border-radius: 8px; background: #fff; color: #23354f; padding: 13px 14px; font: inherit; font-size: 14px; line-height: 1.7; transition: border-color .15s, box-shadow .15s; }
+.field input { min-height: 49px; }
+.field textarea { min-height: 120px; resize: vertical; }
+.field input::placeholder, .field textarea::placeholder { color: #929eaf; }
+.field input:focus, .field textarea:focus { outline: none; border-color: #3989d6; box-shadow: 0 0 0 3px #3989d619; }
+.field input[aria-invalid="true"], .field textarea[aria-invalid="true"] { border-color: #b94049; }
+.field input:disabled, .field textarea:disabled { background: #f5f7fa; }
+.hint, .fieldError, .optional { font-size: 12px; line-height: 1.8; }
+.hint, .optional { color: #77869b; font-weight: 400; }
+.fieldError { color: #a3323d; }
+.primaryButton { width: 100%; min-height: 49px; display: flex; align-items: center; justify-content: center; gap: 14px; border-radius: 8px; padding: 12px 16px; cursor: pointer; font-size: 14px; font-weight: 600; line-height: 1.6; background: #163b70; color: #fff; border: 1px solid #163b70; }
+.primaryButton:hover:not(:disabled) { background: #204c86; }
+.primaryButton > span { font-size: 20px; font-weight: 400; }
+.primaryButton:disabled { opacity: .6; cursor: wait; }
+.primaryButton:focus-visible, .errorBox button:focus-visible, .errorBox a:focus-visible { outline: 3px solid #7eb3ed; outline-offset: 3px; }
+.errorBox { border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.85; margin-bottom: 22px; background: #fff2f3; border: 1px solid #f0d7da; color: #9d3440; }
+.errorBox button, .errorBox a { display: inline-block; margin-top: 7px; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; border: 0; padding: 0; background: transparent; }
+.backLink { display: inline-block; font-size: 13px; color: #60748e; line-height: 1.8; margin-bottom: 28px; }
+.backLink:hover { color: #163b70; text-decoration: underline; }
+.backLink:focus-visible { outline: 3px solid #7eb3ed; outline-offset: 4px; }
+.teamCard { border: 1px solid #e0e7ef; border-radius: 13px; padding: 24px; box-shadow: 0 5px 18px #233b5e04; }
+.cardTop { display: flex; align-items: center; gap: 14px; color: #23354f; padding-bottom: 22px; border-bottom: 1px solid #edf1f6; }
+.cardTop strong { font-size: 15px; line-height: 1.8; }
+.teamIcon { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; flex: none; background: #e8f1fc; color: #163b70; font-size: 32px; }
+.cardLabel, .teamDetails dt { color: #8190a3; font-size: 11px; margin-bottom: 5px; line-height: 1.8; }
+.teamDetails { display: flex; flex-direction: column; gap: 20px; padding-top: 22px; }
+.teamDetails dd { color: #34445b; font-size: 14px; line-height: 1.85; overflow-wrap: anywhere; }
+.description { white-space: pre-wrap; }
+.projectLink { display: block; margin-top: 20px; border: 1px solid #d8e0ea; border-radius: 8px; padding: 12px 16px; color: #255b95; text-align: center; font-size: 14px; line-height: 1.8; text-decoration: none; }
+.projectLink:hover { background: #f3f7fc; }
+.projectLink:focus-visible { outline: 3px solid #7eb3ed; outline-offset: 3px; }
+.membersSection { margin-top: 30px; padding-top: 26px; border-top: 1px solid #e0e7ef; }
+.membersHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.membersHeading h2, .addMember h3 { font-size: 16px; line-height: 1.8; color: #23354f; }
+.textButton { background: none; border: 0; color: #255b95; font-size: 12px; line-height: 1.8; cursor: pointer; flex: none; padding: 5px 0; }
+.textButton:disabled { color: #8190a3; cursor: wait; }
+.textButton:focus-visible { outline: 3px solid #7eb3ed; outline-offset: 3px; }
+.memberList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+.memberList li { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #edf1f6; padding: 13px 0; }
+.memberName { min-width: 0; color: #34445b; font-size: 14px; line-height: 1.85; overflow-wrap: anywhere; }
+.selfLabel { color: #8190a3; font-size: 12px; }
+.leaderBadge, .memberBadge { font-size: 11px; line-height: 1.8; padding: 3px 9px; border-radius: 5px; flex: none; }
+.leaderBadge { color: #255b95; background: #edf4fc; }
+.memberBadge { color: #60748e; background: #f3f5f8; }
+.addMember { margin-top: 24px; }
+.addMember > .hint { margin-top: 5px; margin-bottom: 18px; }
+.memberNotice { color: #28714e; background: #eff9f3; border: 1px solid #d7eddf; border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.8; margin-bottom: 15px; }

@@ -2,15 +2,21 @@
 
 ระบบจัดการโครงงานนักศึกษา ใช้ FastAPI + PostgreSQL และ Next.js/TypeScript
 
+**สำหรับทีมที่จะรับงานSubmission/Milestone:** เริ่มที่ [Team Start Here](docs/team/START_HERE.md), [ตั้งค่าWindows](docs/team/LOCAL_SETUP.md), [Databaseแยกเครื่อง](docs/team/DATABASE_SETUP.md) และ [ผลตรวจชุดส่งต่อ](docs/team/HANDOFF_VERIFICATION.md) ใช้โค้ดbasecommitเดียวกันหลังเจ้าของPushแล้ว ข้อมูล/บัญชีในPostgreSQLไม่ติดไปกับGit
+
 ## สถานะปัจจุบัน
 
 - Backend Auth: สมัคร student, Login, Logout และ GET /api/v1/auth/me
+- Backend Team: POSTสร้างทีม/GETทีมของตน และ GET/POST /api/v1/teams/me/members สำหรับอ่านรายชื่อทีมตน/หัวหน้าเพิ่มmemberด้วยอีเมล ตาม [Members Contract](docs/api/TEAM_MEMBERS_CONTRACT.md); ไม่มีทีมตอบ404 TEAM_NOT_FOUND ตามG-12
 - Frontend Auth: /register, /login และหน้าข้อมูลบัญชีที่ / แบบ Feature-based ใน src/features/auth
 - Database V1: public 14 ตาราง / 86 columns / 28 foreign keys; ส่วนขยาย Auth แยก auth.credentials และ auth.sessions
 - Session คงที่ 8 ชั่วโมง; อีเมลจำลองได้แต่ต้องรูปแบบถูกต้อง รหัสผ่าน ≥8 ตัว มี A–Z และตัวเลขอย่างละ ≥1
-- Team/Project API และหน้าธุรกิจ ST-01–ST-09 ยังไม่พัฒนา หน้าบัญชีปัจจุบันไม่ใช่ Dashboard
+- Frontend Team: /teamsสร้างทีม อ่านทีม/รายชื่อหลังrefresh และหัวหน้าเพิ่มสมาชิกด้วยอีเมล สมาชิกทั่วไปอ่านรายชื่อได้ ไม่มีuser directory; ออก/ถอดสมาชิก/โอนหัวหน้ายังไม่ครบ หน้าบัญชีไม่ใช่Dashboard
+- Project: POST /api/v1/projectsให้หัวหน้าสร้างหนึ่งProjectต่อทีม และGET /api/v1/projects/meให้สมาชิกอ่านทีมตน หน้า/projectsเข้าจากลิงก์ใน/teams มีcreate/readเบื้องต้น ไม่มีDELETE ตาม [Project Contract](docs/api/PROJECT_CREATE_CONTRACT.md)
+- Advisor invitations: /projects/advisor-invitationsให้ทีมอ่านประวัติ/หัวหน้าส่งและยกเลิก ส่วน/advisor/invitationsให้อาจารย์ตอบรับ/ปฏิเสธ เลือกจากรายชื่อและตรวจสิทธิ์ตามG-12; มีบัญชีadvisor1บัญชีที่ผู้ดูแลบันทึกตามอนุมัติแล้ว ไม่ใช่บัญชีที่ค้างจากtests
+- เตรียมบัญชีadvisor: มี [CLIสำหรับผู้ดูแลและผลบันทึก](docs/database/ADVISOR_ACCOUNT_PROVISIONING.md) DefaultDRY_RUN/ROLLBACK รับรหัสผ่านผ่านhiddenTerminal ไม่แก้บัญชีเดิม --applyบันทึกบัญชีที่อนุมัติ1บัญชีแล้ว บัญชีอื่นยังต้องอยู่ในขอบเขตที่อนุมัติ
 
-รายละเอียดและหลักฐานล่าสุด: [Backlog](docs/progress/BACKLOG.md), [Schema V1 Reference](docs/database/SCHEMA_V1_REFERENCE.md), [Auth Contract](docs/api/AUTH_CONTRACT.md), [Auth Installation Report](docs/database/AUTH_INSTALLATION_REPORT.md)
+รายละเอียดและหลักฐานล่าสุด: [Backlog](docs/progress/BACKLOG.md), [Schema V1 Reference](docs/database/SCHEMA_V1_REFERENCE.md), [Auth Contract](docs/api/AUTH_CONTRACT.md), [Auth Installation Report](docs/database/AUTH_INSTALLATION_REPORT.md), [Advisor Invitations Report](docs/progress/ADVISOR_INVITATIONS_IMPLEMENTATION_REPORT.md)
 
 ## โครงสร้าง
 
@@ -67,10 +73,10 @@ Pop-Location
 
 ข้อจำกัดที่พบจาก source ปัจจุบัน:
 
-- P06: persistent test DB ของเครื่องเดิมยังขาด public.v1_lock_team เทียบกับ SQL source ไม่ถือว่า clone แล้วได้ baseline เดียวกับเครื่องเดิมอัตโนมัติ
-- ตัวติดตั้ง RBAC เดิม Database_Schema_V1_RBAC_Test_Apply_Only.py ปฏิเสธกรณี DB_NAME ใน config เท่ากับ test DB จึงยังใช้เป็นคำสั่ง setup เครื่องใหม่ต่อกันทันทีภายใต้นโยบาย test-only ไม่ได้ **ห้ามตั้งค่าไป DB หลักเพื่อข้าม guard** ต้องตรวจรับ/อนุมัติการแก้เครื่องมือแยก
-- Readonly_Preflight เดิมใช้ backend.database และยังไม่บังคับ target test DB ห้ามรันในงาน test-only จนแก้ guard ตามขอบเขตที่อนุมัติ
-- ไม่ได้ทดสอบ fresh install ของทีมในงานจัดไฟล์นี้ และไม่ได้เปลี่ยน SQL/roles/grants เพื่อแก้ข้อจำกัดดังกล่าว
+- P06: ติดตั้ง6function repair และ EXECUTE helper1รายการใน test DB ตามอนุมัติแล้ว มี52 V1 functions ตรงsource ตรวจ direct project_app สร้างTeam→leader→Projectผ่าน โดยข้อมูลจำลอง ROLLBACK ดู [V1 Baseline Installation Report](docs/database/V1_BASELINE_INSTALLATION_REPORT.md)
+- แก้ Preflight/เครื่องมือติดตั้ง V1 ทั้ง5ตัวให้ใช้ Test_Database ซึ่ง pin test DB และไม่ import backend.database แล้ว ไม่ต้องตั้ง DB_NAME ไป DB หลักเพื่อให้ RBAC Apply ผ่าน Preflight บังคับ read-only ตั้งแต่เริ่ม connection
+- .gitattributes บังคับ SQL ใน database/ เป็น LF เพื่อรักษา checksum ข้ามเครื่อง ไม่เปลี่ยน SQL V1/Auth ต้นฉบับ
+- ผลหลังติดตั้ง: direct Team8, owner/Team9, Workflow57, boundary/Auth74 และ Auth DB40ผ่าน บน installed baseline โดยไม่ลงแพตช์ซ้ำ ทุกชุดคืนbaseline52functionsหลังROLLBACK ยังไม่ใช่ fresh install ของเครื่องทีม/Concurrency หรือ Team APIที่พัฒนาแล้ว
 
 ถ้าเลือกย้ายฐานข้อมูลด้วย dump/restore ให้ทำแผนแยก ไม่อัปโหลด dump ที่มีข้อมูลบัญชี/hash/session ลง GitHub และต้องเตรียม roles ก่อน restore เพื่อรักษา ownership/grants ดู [PostgreSQL backup/restore](https://www.postgresql.org/docs/18/backup-dump.html) ยังไม่มีการ export/restore ในงานนี้
 
@@ -80,7 +86,7 @@ Pop-Location
 
 ```powershell
 if (-not (Test-Path -LiteralPath backend/.env)) {
-    Copy-Item -LiteralPath backend/.env.auth.example -Destination backend/.env
+    Copy-Item -LiteralPath backend/.env.example -Destination backend/.env
 }
 ```
 
@@ -92,9 +98,9 @@ if (-not (Test-Path -LiteralPath backend/.env)) {
 | AUTH_DB_PORT | port ของ PostgreSQL; ค่าเริ่มต้น 5432 |
 | AUTH_DB_PASSWORD | รหัส PostgreSQL ของ project_app ใน instance นั้น ไม่ใช่รหัสนักศึกษา |
 
-Auth runtime pin DB เป็น student_project_management_v1_test และ role เป็น project_app ในโค้ด ไม่ใช้ postgres/project_owner แทน app Config ตัวอย่างต้องไม่มีรหัสจริงและรหัสแต่ละเครื่องไม่จำเป็นต้องเหมือนกัน
+Auth runtime pin DB เป็น student_project_management_v1_test และ role เป็น project_app ในโค้ด ไม่ใช้ postgres/project_owner แทน app Templateครบคือbackend/.env.example ส่วน.env.auth.exampleเป็นruntime-onlysubset ทั้งสองไม่มีรหัสจริงและรหัสแต่ละเครื่องไม่จำเป็นต้องเหมือนกัน
 
-DB tests/installer บางตัวต้องใช้ DB_HOST, DB_PORT, DB_USER และ DB_PASSWORD สำหรับ fixture/deployment เพิ่มใน backend/.env โดยผู้ดูแลตามขั้นตอนที่อนุมัติ ไม่ใช้ admin config แทน AUTH_* และไม่คัดลอก DB_NAME ของฐานข้อมูลหลักเพื่อให้เครื่องมือเก่ารันผ่าน รายละเอียดข้อจำกัดอยู่ในขั้น baseline ด้านบน
+DB tests/installer บางตัวต้องใช้ DB_HOST, DB_PORT, DB_USER และ DB_PASSWORD สำหรับ fixture/deployment เพิ่มใน backend/.env โดยผู้ดูแลตามขั้นตอนที่อนุมัติ ไม่ใช้ admin config แทน AUTH_* เครื่องมือ V1 ปรับให้ ignore DB_NAME แล้ว pin test DB โดยตรง ไม่ต้องเตรียม DB หลักสำหรับงานนี้
 
 Frontend เริ่มต้นเรียก http://localhost:8000 โดยไม่ต้องสร้าง config ถ้าต้องระบุใช้ frontend/.env.example เป็นแบบสำหรับ .env.local และตั้งเฉพาะ NEXT_PUBLIC_API_BASE_URL ห้ามใส่ password/secret ใน Frontend
 
@@ -131,12 +137,21 @@ Pop-Location
 หลัง baseline/private config พร้อมและอยู่ในขอบเขตทดสอบที่อนุมัติ:
 
 ```powershell
-& .\backend\.venv\Scripts\python.exe -B -m unittest backend.tests.test_auth_validation backend.tests.test_auth_security backend.tests.test_auth_api -q
+& .\backend\.venv\Scripts\python.exe -B -m unittest backend.tests.test_auth_validation backend.tests.test_auth_security backend.tests.test_auth_api backend.tests.test_team_api backend.tests.test_team_members_api backend.tests.test_project_api backend.tests.test_invitation_api database.tests.test_test_database database.tests.test_advisor_provision -q
+& .\backend\.venv\Scripts\python.exe -B -m backend.tests.team_api_direct_smoke
 ```
 
 Browser tests ต้องติดตั้ง Microsoft Edge และเว้น ports3000/8001 ให้ชุดทดสอบเปิดเอง จาก frontend ใช้ npm run test:e2e ซึ่งเรียก fixture rollback-only ไม่ใช้ Backend ปกติ ดู [Frontend README](frontend/README.md) สำหรับวิธีใช้/ข้อจำกัด ไม่รันพร้อมกับ normal Frontend3000
 
 ผลจากรอบพัฒนา Auth ก่อนงานจัดไฟล์: Backend65 + Browser5, lint/TypeScript/build และ baseline หลัง ROLLBACK ผ่าน ผลนี้ไม่ใช่ fresh install ของทีม หรือหลักฐานว่า business workflows/Concurrency พร้อมแล้ว
+
+ตรวจ installed Team DB ด้วย [V1_Baseline_Prepare](database/tools/V1_Baseline_Prepare.py): default/--check เป็น read-only ปัจจุบัน PASS ส่วน --test-installed --workflow ใช้ baselineจริงโดยไม่ทำDDLและ ROLLBACK fixtures ทั้งหมด เพิ่ม direct app regression ที่ database/tests/Team_Create_Installed_Regression.py ตัวติดตั้งแยก V1_Baseline_Install default read-only และ --apply ต้องอยู่ในขอบเขตอนุมัติ ไม่ใช้ initial schema installer ลงทับฐานข้อมูลเดิม
+
+รอบ Advisor invitations ล่าสุด: Backend174testsผ่าน (Auth65+Team37+member18+Project21+invitation24+boundary9), Browser42/42 (5+8+8+9+12), lint/TypeScript/build และdirect app boundary smokeผ่าน ทุกfixtureคืนbaseline52functionsและข้อมูลเดิม ไม่เปลี่ยนSQL/grants/.env Browserใช้ownerเตรียมบัญชีชั่วคราวก่อนswitchเป็นeffectiveproject_appทุกrequest ไม่ใช่directLOGINappทั้งsuite อ่านรายงานสำหรับroleboundaryและข้อจำกัด ยังไม่Concurrencyจริง/fresh installเครื่องทีมหรือsuccessful runtime dataCOMMIT
+
+รอบCLIadvisorต่อมา: เพิ่ม17testsและRegressionรวม191ผ่าน พร้อม--check/TTYdryrunจริง ต่อมาผู้ใช้อนุมัติ--applyบันทึกadvisor1บัญชีสำเร็จ Login/Me/inbox/Logoutผ่านdirectproject_appโดยROLLBACKsessionทดสอบ และprovisioning17testsหลังapplyผ่าน ไม่แก้API/Frontendจึงไม่รันBrowser/lint/buildซ้ำ ค่าBrowser42ด้านบนเป็นผลรอบInvitation อ่านคู่มือสำหรับหลักฐานแต่ละรอบ
+
+รอบส่งต่อทีมล่าสุด: รันRegression191/Browser42/lint/TypeScript/buildและinstalledDBworkflow57ผ่านใหม่ พร้อมROLLBACKcleanup ตรวจsecret/configexamples/localimports/เอกสาร/sourceSQLแล้ว ดู [Handoff Verification](docs/team/HANDOFF_VERIFICATION.md) สำหรับขอบเขตจริง โดยเฉพาะfreshinstallบนเครื่องสมาชิกที่ยังNotVerified ยังไม่stage/Commit/Pushในรอบเตรียมนี้
 
 ## ก่อน Commit/Push
 

@@ -1,6 +1,6 @@
 # API Contract — สร้างทีมพร้อมหัวหน้าทีม
 
-วันที่: 2026-11-06 · Task: P16 / P09 · สถานะ: **Draft สำหรับทบทวน ยังไม่มี endpoint implementation**
+อัปเดต: 2026-11-07 · Task: P16 / P09 · สถานะ: **ผู้ใช้ยืนยันรูปแบบแล้ว Backend และ Frontend /teams implemented/tested** ดู [รายงานล่าสุด](../progress/TEAM_FRONTEND_IMPLEMENTATION_REPORT.md)
 
 อ้างอิง [Schema V1 Reference](../database/SCHEMA_V1_REFERENCE.md), [Data Dictionary](../database/Database_Schema_V1_Data_Dictionary.md), [SQL](../../database/schema/Database_Schema_V1_A02_A05_REVIEW_DRAFT.sql), [RBAC](../../database/schema/Database_Schema_V1_A02_A05_RBAC_REVIEW_TEMPLATE.sql) และ [Backlog](../progress/BACKLOG.md)
 
@@ -16,12 +16,12 @@
 | ใช้งานเพื่อส่งอาจารย์และทดสอบภายในทีม ไม่ได้ตั้งใจเปิดใช้งานจริง | **ผู้ใช้ยืนยัน 2026-11-06** |
 | ใช้อีเมลจำลองที่ไม่มีกล่องรับข้อความจริง และตั้งรหัสผ่านเองได้ | **ผู้ใช้ยืนยัน 2026-11-06**; ตรวจรูปแบบอีเมล ไม่จำกัด Gmail; รหัสผ่านอย่างน้อย 8 ตัว มีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัวและตัวเลขอย่างน้อย 1 ตัว |
 | วิธี Login | Backend ดูแลเอง ไม่ใช้ Firebase; Register/Login/Logout มีโค้ด/tests แล้วตาม [Auth Contract](AUTH_CONTRACT.md); session 8 ชั่วโมง/localhost ตามที่ยืนยัน |
-| การสร้างบัญชี | **ผู้ใช้ยืนยัน** student สมัครเอง; ผู้ดูแลเตรียม advisor/coordinator; Auth storage/RBAC ผ่าน DB regression 40/40 และ ROLLBACK แล้ว ยังไม่มี Signup endpoint |
-| URL, JSON envelope, ID encoding, error codes ในเอกสารนี้ | ข้อเสนอทาง API ของร่างนี้ ไม่ใช่ข้อความ Requirement V1 เดิม |
+| การสร้างบัญชี | **ผู้ใช้ยืนยัน** student สมัครเอง; ผู้ดูแลเตรียม advisor/coordinator; Signup endpoint และ Authส่วนที่เกี่ยวข้องมีโค้ด/testsแล้ว การเตรียมบัญชีอาจารย์ยังไม่มีเครื่องมือ |
+| URL, JSON envelope, ID encoding, error codes ในเอกสารนี้ | ผู้ใช้ตอบ “ใช้รูปแบบนี้ตามร่าง” สำหรับ POST /api/v1/teams, name/description, session/CSRF, 201+IDsเป็นstring และ 401/403/409/422/500 แล้ว |
 
-สถานะปัจจุบัน: Auth มี 3 endpoints/hash/tests และ schema/grants ถาวรแล้ว Direct project_app connection และ smoke Register/Login/Logout ผ่านพร้อม ROLLBACK ส่วน POST /teams ยังเป็นร่าง ไม่มี Team endpoint รายละเอียดอยู่ในส่วน 7 และ Auth Contract
+สถานะปัจจุบัน: POST /api/v1/teams มีโค้ด/testsแล้วตามรูปแบบที่ยืนยัน Backend suite101ผ่าน (Auth65+Team27+boundary9) และ direct project_app ASGI/TCP flowผ่านพร้อมROLLBACK ดู [Team Implementation Report](TEAM_CREATE_IMPLEMENTATION_REPORT.md) Frontend Authเดิมมีแล้วแต่ยังไม่เชื่อมTeam API ไม่แก้SQL/RBAC/RequirementsในรอบAPIนี้
 
-## 2. Endpoint ที่เสนอ
+## 2. Endpoint ที่ยืนยันและ implement แล้ว
 
 `POST /api/v1/teams`
 
@@ -30,6 +30,9 @@
 - ไม่ใช้ `user_id`, `role`, `actor_user_id` จาก request เพื่อเลือกตัวผู้สร้าง
 - เวอร์ชันนี้สร้างเฉพาะ Team และหัวหน้าคนแรก ไม่สร้าง Project และไม่เพิ่มสมาชิกอื่นใน request เดียว
 - ชื่อ Team ซ้ำกับทีมอื่นได้ตาม Schema; ไม่เพิ่ม unique rule ให้ชื่อทีม
+- ต้องมี Origin เป็น http://localhost:3000 หรือ http://localhost:8000 และ session cookie จาก Login; ส่ง CSRF cookie พร้อม X-CSRF-Token ที่ตรงกันและผูกกับ sessionนั้นตาม Auth เดิม ไม่รับ Bearer token/identity header เป็นactor
+- Originขาด/null/ผิด ตอบ403 ORIGIN_NOT_ALLOWED; sessionขาด/ผิด/หมดอายุ/ถูกเพิกถอนตอบ401; CSRFขาด/ผิด/มาจากsessionอื่นตอบ403 CSRF_INVALID ไม่มี wildcard CORS
+- Auth/role/membership ตรวจใน transactionเดียวกับการเขียน ไม่ใช้ caller-supplied user_id และไม่เปลี่ยน session TTL/rotate cookieจากการสร้างทีม ทุกresponseใช้ Cache-Control:no-store
 
 ### Request
 
@@ -38,7 +41,7 @@
 | `name` | string | ใช่ | trim ให้ตรง V1; ค่าที่บันทึกต้องไม่ว่างและยาวไม่เกิน 255 อักขระ; ไม่รับ null/ชนิดข้อมูลอื่น |
 | `description` | string หรือ null | ไม่ | trim; ไม่ส่ง/null/ว่างหลัง trim เก็บเป็น null; V1 ไม่กำหนดความยาวสูงสุดของ TEXT |
 
-ข้อเสนอ wire validation: ปฏิเสธ field นอกเหนือสองรายการนี้ด้วย 422 รวมถึง `id`, `leader_id`, `user_id`, `role`, `members`, `member_ids` และ `project` การเพิ่มสมาชิกภายหลังจะออกแบบ Contract แยกตามสิทธิ์/phase ของ V1
+Wire validation: ปฏิเสธ field นอกเหนือสองรายการนี้ด้วย422 รวมถึง id/leader_id/user_id/actor_user_id/role/members/member_ids/project ปฏิเสธ NUL และ unpaired Unicode surrogate ที่ PostgreSQL UTF-8 text เก็บไม่ได้ด้วย TEAM_TEXT_INVALID ไม่เพิ่มกฎชื่อUniqueหรือจำกัดความยาวdescriptionเอง การเพิ่มสมาชิกภายหลังเป็นContractแยก
 
 ตัวอย่าง request ซึ่งเป็นข้อมูลจำลอง:
 
@@ -51,7 +54,7 @@
 
 รายละเอียด normalization ให้ยึด `v1_team_guard`/CHECK ของ teams ไม่เพิ่มการแปลงตัวพิมพ์ Unicode normalization หรือกฎชื่ออื่นเอง การทดสอบ API ต้องเทียบกับ SQL ก่อนถือว่าผ่าน
 
-### Success response ที่เสนอ
+### Success response
 
 `201 Created` ส่งหลัง transaction บันทึกสำเร็จเท่านั้น
 
@@ -76,32 +79,33 @@
 - `data.id` มาจาก teams.id; `members[0].id` มาจาก team_members.id; user_id มาจากผู้ใช้ที่ Backend ตรวจแล้ว
 - response แสดงค่าที่อ่านคืนจาก DB หลัง normalization; members มีหนึ่งคนตามขอบเขตที่ผู้ใช้ยืนยัน
 - ไม่เพิ่ม `created_by`, `created_at`, `status` ลง teams เพราะไม่มีคอลัมน์เหล่านี้ใน V1
-- ยังไม่สัญญา GET endpoint, Location header, idempotency key หรือการ retry ที่ให้ผลเหมือนเรียกครั้งเดียว ซึ่งยังไม่มี Contract
+- GETทีมของตนใช้ [Current Team Contract](TEAM_CURRENT_CONTRACT.md) ที่ยืนยันแล้ว ไม่มีทีมตอบ404 TEAM_NOT_FOUND; ยังไม่กำหนดLocation header/idempotency keyหรือautomatic POST retry
 
 ## 3. Transaction และ actor
 
-ลำดับสำหรับ implementation ในอนาคต:
+ลำดับที่ implementation ใช้:
 
-1. ตรวจหลักฐาน Auth และ resolve เป็นผู้ใช้ที่มีอยู่ใน V1; ถ้ายังจับคู่บัญชีไม่ได้ ให้ปฏิเสธก่อนเขียน Team ไม่สร้าง users อัตโนมัติจาก request นี้
-2. ตรวจ JSON/normalize ตามกฎ แล้วเริ่ม transaction ด้วย application DB role `project_app`
+1. ตรวจOrigin/JSONและnormalizeตามกฎ ใช้session cookieจากLoginเดิม ไม่สร้างusersอัตโนมัติจากrequestนี้
+2. เริ่มtransactionด้วยapplication DB role project_app แล้วresolveactive sessionเป็นผู้ใช้ V1 ตรวจCSRFก่อนเขียน หากresolveไม่พบผู้ใช้ให้401
 3. ตรวจผู้ใช้จริงเป็น student และไม่มีสมาชิกภาพปัจจุบัน; precheck ใช้เพื่อให้ error ชัด แต่ต้องรักษา UNIQUE ของ DB เพื่อรองรับ race
 4. กำหนด `app.actor_user_id` แบบ transaction-local จากผู้ใช้ที่ตรวจแล้ว โดยใช้ parameterized SQL; ไม่เชื่อ custom GUC ที่ client ส่งมา
-5. INSERT teams ด้วย name/description และอ่าน id ที่ DB สร้าง
+5. กำหนดเฉพาะ c_team_created_has_leader/c_team_member_cardinality เป็น DEFERRED เพื่อให้ควบคุมลำดับ Team+leader ได้แม้ transactionเคย force IMMEDIATE แล้ว INSERT teams อ่าน id และเรียก v1_lock_team ก่อน child write ไม่ปิด triggers/CHECK/UNIQUE/FK
 6. INSERT team_members ด้วย team_id ที่เพิ่งได้, user_id ของผู้สร้าง และ role='leader'; ใช้สิทธิ์ INSERT ที่ RBAC อนุญาตและปล่อย triggers ทำงาน
 7. บังคับตรวจ constraint ที่เกี่ยวข้องก่อนสรุปผล เช่น `SET CONSTRAINTS c_team_created_has_leader, c_team_member_cardinality IMMEDIATE`; การจบ transaction ต้องสำเร็จก่อนตอบ 201
 8. ถ้า INSERT/constraint/การจบ transaction ล้มเหลว ให้ย้อนกลับทั้ง Team และ leader; ไม่มีทีมกำพร้า ไม่มีผลสำเร็จบางส่วน
 
 API ปกติไม่ใช้ postgres/project_owner เพื่อข้ามสิทธิ์ และไม่เพิ่ม grants เมื่อเจอ permission denied ต้องรายงาน configuration/patch ที่ขาด
 
-รอบออกแบบนี้ไม่ได้อนุญาต COMMIT ลง test DB การทดสอบ DB ตามข้อจำกัดเดิมต้อง transaction/ROLLBACK และตรวจชื่อ `student_project_management_v1_test` ทุกชุดก่อนเขียน; การเปิด endpoint ที่บันทึกถาวรหรือเตรียม baseline/fixture ถาวรต้องมีขอบเขตที่อนุมัติแยก
+Runtimeใช้ project_app/test DB และออกแบบให้จบtransactionก่อนตอบ201 ส่วนการทดสอบรอบนี้ทุกdata writeอยู่ในouterTransaction/ROLLBACK ไม่ได้ทดสอบ successful live runtime data COMMIT ตัวทดสอบTCPใช้rollback-only server8001ซึ่ง overrideทั้งAuth/Team UOW ไม่มีfixtureถาวร การติดตั้งDDL baselineเป็นscopeก่อนหน้า ไม่ได้COMMITข้อมูลทดสอบในรอบAPIนี้
 
-## 4. Error contract ที่เสนอ
+## 4. Error contract
 
 | HTTP | Code | กรณี | ที่มา |
 |---|---|---|---|
 | 401 | `AUTHENTICATION_REQUIRED` | ไม่มี/ไม่ผ่านหลักฐานยืนยันตัวตน | G-12; รายละเอียด token/session ขึ้นกับ Auth ที่เลือก |
 | 403 | `TEAM_CREATION_FORBIDDEN` | ยืนยันตัวตนแล้ว แต่ไม่มีสิทธิ์สร้างทีม เช่นไม่ใช่ student | G-12 และข้อ student-only |
-| 403 | `ACCOUNT_NOT_PROVISIONED` | ข้อเสนอเดิมสำหรับ external identity; ไม่ใช่ code ที่ Auth API ปัจจุบัน implement | ต้องทบทวนก่อนใช้ Team handler เพราะ self-managed session ปัจจุบันอ้าง users.id ผ่าน FK |
+| 403 | `CSRF_INVALID` | sessionถูกต้องแต่cookie/header CSRFไม่ผ่าน | ใช้session-bound CSRFจากLoginเดิม |
+| 403 | `ORIGIN_NOT_ALLOWED` | Originขาด/null/ไม่อนุญาต | ใช้allowed_originsเดิม |
 | 409 | `ALREADY_IN_TEAM` | ผู้สร้างเป็นสมาชิกทีมแล้ว รวม race ที่อีก transaction บันทึกสำเร็จก่อน | UNIQUE team_members.user_id; HTTP/code เป็นข้อเสนอ |
 | 422 | `VALIDATION_ERROR` | JSON/field/type/name ไม่ถูกต้อง หรือส่ง fields ที่ไม่รองรับ | รูปแบบ validation ที่เสนอ |
 | 500 | `INTERNAL_ERROR` | unexpected DB/configuration/transaction failure | ไม่ส่ง raw SQLSTATE, constraint name, SQL หรือ traceback ให้ client |
@@ -133,9 +137,9 @@ G-12 ยังคงกำหนด 404 สำหรับ resource ที่ไ
 }
 ```
 
-ข้อควรยืนยันตอน implement:
+พฤติกรรมที่ implement/ทดสอบแล้ว:
 
-- แปลง SQLSTATE `23505` เป็น ALREADY_IN_TEAM เฉพาะ constraint `team_members_user_id_key` ของ operation นี้ ไม่แปลง UNIQUE ทุกชนิดเหมือนกัน
+- แปลง SQLSTATE23505 เป็น ALREADY_IN_TEAM เฉพาะ public.team_members/team_members_user_id_key ไม่แปลง UNIQUEอื่น ใช้precheckเพื่อข้อความชัดและยังรักษาDB UNIQUEเพื่อรองรับrace
 - `42501` ที่เกิดจาก DB grants/actor configuration ผิด ไม่ใช่ข้อพิสูจน์ว่าเป็น 403 ของผู้ใช้เสมอ ต้องแยกจาก business authorization
 - `P0001` เป็น exception ทั่วไปในหลาย triggers จึงห้ามแปลงทั้งหมดเป็น input error; deferred cardinality failure ของ handler เป็นความผิดพลาดภายในที่ต้อง rollback
 - ไม่เปิดเผยชื่อทีมอื่น/สมาชิกอื่นใน error; พฤติกรรมกรณีมีหลาย error พร้อมกันให้กำหนดกับ validation implementation ไม่อนุมานจากลำดับข้อความในตาราง
@@ -143,7 +147,7 @@ G-12 ยังคงกำหนด 404 สำหรับ resource ที่ไ
 
 ## 5. Acceptance cases ของ Contract
 
-ตารางนี้เป็นเกณฑ์ที่เสนอจากกฎ V1 และขอบเขตที่ผู้ใช้ยืนยัน **ยังไม่ใช่ผล API test PASS**
+ตารางนี้เป็นเกณฑ์จากV1/ขอบเขตที่ยืนยัน ส่วนTEAM-01–09/11/13มีHTTP+PostgreSQL coverageแล้ว TEAM-10ยังไม่ใช่multi-session proof รายละเอียด/ข้อจำกัดอยู่ในImplementation Report
 
 | Case | สถานการณ์ | ผลที่ต้องพิสูจน์ |
 |---|---|---|
@@ -158,20 +162,21 @@ G-12 ยังคงกำหนด 404 สำหรับ resource ที่ไ
 | TEAM-09 | บังคับขั้นสร้าง leader หรือ deferred check ให้ล้มเหลว | rollback Team และ member ทั้งหมด; ไม่ตอบ 201 |
 | TEAM-10 | request พร้อมกันของ student เดียวกัน | คงสมาชิกภาพได้สูงสุดหนึ่งทีม; transaction ที่ชนสมาชิกภาพที่บันทึกแล้วต้องไม่ทิ้ง Team กำพร้า; ยังต้อง concurrency test |
 | TEAM-11 | ID ของ DB เกินช่วง integer ที่ JS Number เก็บได้ตรง | response string และ client ไม่แปลงจนเสีย precision |
-| TEAM-12 | token/session ถูกต้องแต่ไม่มี mapping กับบัญชี V1 | ปฏิเสธตาม Auth contract ที่ตกลง; ไม่ auto-create user/role |
+| TEAM-12 | session resolveไม่พบผู้ใช้ V1 | 401 AUTHENTICATION_REQUIRED ไม่สร้างบัญชีอัตโนมัติ; external identity mappingเดิมไม่ใช้กับself-managed Auth และ FKรักษาความสัมพันธ์ของsession |
 | TEAM-13 | DB grants/patch ไม่ครบ | rollback และ internal error ที่ไม่เผยข้อมูลลับ; ไม่สลับใช้ superuser |
 
 หลักฐานเดิม: [RBAC Lock Regression](../../database/tests/Database_Schema_V1_RBAC_Lock_Regression.py) มีกรณีสร้าง Team/leader, ชื่อว่าง, orphan team และตรวจ deferred; [Workflow Regression](../../database/tests/Database_Schema_V1_Workflow_Regression.py) ทดสอบ DB workflow รวม 57 กรณีก่อนย้ายไฟล์ ทั้งสองชุดเป็น DB-only ไม่พิสูจน์ HTTP/Auth/JSON response ในตารางนี้ และรอบทำ Contract ไม่ได้รัน DB ซ้ำ
 
-## 6. งานที่ยังต้องทำก่อนทดสอบ workflow ผ่าน API
+## 6. งานที่เหลือหลัง Backend API
 
-- ใช้แนวทาง Backend ดูแล Login เอง และปิดประเด็นที่เหลือใน [Auth Design](AUTH_DESIGN.md): ที่เก็บ credentials/session, provisioning, สิทธิ์ DB, อายุ session และ logout/recovery
-- รับรอง wire format ของร่างนี้ก่อนให้ Frontend/Backend ยึดเป็น Contract เดียวกัน
-- เตรียม test DB baseline ที่มีแพตช์ตามขอบเขตที่อนุมัติ โดยไม่ใช้ installer schema ว่างเป็น migration
-- Implement request/response models, handler/service/transaction และ tests ตาม Contract; ยังไม่ได้แก้ backend/main.py
-- เพิ่มสมาชิกและสร้าง Project เป็น Contract ถัดไป ไม่รวมใน endpoint แรกนี้
+- Frontend /teams เชื่อมcreate/GETทีมของตนและเพิ่ม-อ่านรายชื่อแล้ว มีลิงก์ไป/projectsตาม [Project Contract](PROJECT_CREATE_CONTRACT.md) ที่ยืนยันและimplementภายหลัง ส่วนworkflowอื่นยังเป็นงานถัดไป
+- TEAM-10: เตรียมfixture/แผนทดสอบmulti-sessionตามสิทธิ์ที่อนุมัติ การจำลองstale precheckในชุด27testsไม่แทนConcurrencyจริง
+- baselineติดตั้งแล้วและ Auth/session/CSRFมีโค้ด/tests ส่วนprovisioning/recovery/securityที่เหลือยังเป็นงานแยกตาม [Auth Design](AUTH_DESIGN.md)
+- เพิ่มสมาชิก/อ่านรายชื่อแยกตาม [Members Contract](TEAM_MEMBERS_CONTRACT.md) และProject create/currentตามContractแยกที่implementแล้ว ไม่รวมในPOSTสร้างทีมนี้
 
-## 7. ข้อเสนอ Auth หลังยืนยันว่าไม่มี SSO
+## 7. ประวัติการออกแบบ Auth ก่อนพัฒนา Team API
+
+เนื้อหาหัวข้อนี้เป็นผลตามรอบเดิม สถานะล่าสุดใช้หัวข้อ1–6, Auth Contract และ Implementation Report ไม่ใช้ข้อความ “ยังต้อง implement” ในประวัติแทนผลปัจจุบัน
 
 ### ขอบเขตล่าสุด: โปรเจกต์ส่งอาจารย์และทดสอบภายในทีม
 

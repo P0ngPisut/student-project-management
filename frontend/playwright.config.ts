@@ -23,7 +23,7 @@ export default defineConfig({
       command: '"backend/.venv/Scripts/python.exe" -B -m backend.tests.auth_browser_server',
       cwd: root,
       url: "http://localhost:8001/",
-      env: { SPMS_AUTH_BROWSER_ROLLBACK: "1" },
+      env: { SPMS_AUTH_BROWSER_ROLLBACK: "1", SPMS_INVITATION_BROWSER_FIXTURES: "1" },
       reuseExistingServer: false,
       timeout: 30_000,
     },

@@ -63,7 +63,7 @@ RBAC ปัจจุบันมีสิทธิ์ Auth ที่ติดต
 - ใช้ project_owner เป็น owner และติดตั้งสิทธิ์ Auth เฉพาะส่วนให้ project_app ตามส่วน 8 แล้ว ไม่มีการสร้าง role ใหม่หรือเปลี่ยนสมาชิก/รหัสผ่าน role
 - ไม่ให้ client เลือก users.id/role/หัวหน้าทีมผ่าน payload เพื่อข้ามสิทธิ์
 - POST /api/v1/auth/register ตรวจข้อมูล/hash แล้วเรียก auth.register_student สร้าง users + credentials ใน function statement เดียวและกำหนด role='student' ตายตัว ไม่เปิด INSERT users ตรงให้ project_app; ผ่าน HTTP/PostgreSQL tests แล้วใน transaction/ROLLBACK
-- advisor/coordinator ให้ผู้ดูแลเตรียมผ่านเครื่องมือ provisioning ที่จะออกแบบแยก ไม่เปิด API สมัครเป็นอาจารย์หรือ runtime owner ในรอบนี้ ยังไม่มีเครื่องมือหรือบัญชีที่เตรียมแล้ว
+- advisor/coordinatorยังให้ผู้ดูแลเตรียม ไม่เปิดAPIสมัครเป็นอาจารย์หรือruntimeowner ปัจจุบันมี [CLIสร้างadvisorใหม่](../database/ADVISOR_ACCOUNT_PROVISIONING.md) พร้อม17tests/TTYdryrun และบันทึกadvisor1บัญชีตามอนุมัติแล้ว ส่วนcoordinator/เปิดcredentialsบัญชีเดิม/resetยังไม่มีเครื่องมือ
 - เมื่อ email ซ้ำกับ users ที่มีอยู่ ห้ามถือสิทธิ์ในบัญชีนั้นเพียงเพราะกรอกอีเมลตรง การเปิดใช้ credentials ของ user เดิมต้องผ่าน provisioning ที่อนุมัติ
 
 ## 5. API ที่เสนอ

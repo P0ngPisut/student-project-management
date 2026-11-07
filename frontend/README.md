@@ -2,14 +2,20 @@
 
 Next.js App Router + TypeScript สำหรับ Student Project Management System
 
+สำหรับทีมWindowsที่ใช้PostgreSQLแยกเครื่อง อ่าน [Team Start Here](../docs/team/START_HERE.md) และ [Local Setup](../docs/team/LOCAL_SETUP.md) ก่อน คู่มือรวมมีfullenvtemplate/adminfixtureconfigและลำดับเตรียมDBที่จำเป็น Browsertestsไม่ใช่normalserverสำหรับseedข้อมูลถาวร
+
 ## ขอบเขตปัจจุบัน
 
 - `/register`: สมัครเป็น student ด้วยชื่อ อีเมลจำลองรูปแบบถูกต้อง และรหัสผ่าน ≥8 ตัว มี A–Z/ตัวเลขอย่างละ ≥1
 - `/login`: เข้าสู่ระบบด้วยบัญชีที่มีอยู่ สมัครสำเร็จแล้วต้อง Login เอง
 - `/`: ตรวจ session ผ่าน Backend และแสดงชื่อ/อีเมล/บทบาท พร้อม Logout ยังไม่ใช่ Dashboard ST-01
+- `/teams`: studentสร้างทีมพร้อมตนเป็นหัวหน้า อ่านทีม/รายชื่อสมาชิกหลังrefresh หัวหน้าเพิ่มmemberด้วยอีเมลตรงตัว สมาชิกธรรมดาอ่านรายชื่อได้; กรณีไม่มีทีมใช้404TEAM_NOT_FOUNDตามG-12 ไม่มีuser directory
+- `/projects`: หัวหน้าสร้างProjectของทีม สมาชิกอ่านProjectได้ เข้าจากลิงก์ใน/teams; ไม่มีทีมแนะนำไป/teams มีทีมแต่ไม่มีProjectให้leaderเห็นformและmemberเห็นข้อความรอ ไม่มีProject delete/update UI
+- `/projects/advisor-invitations`: สมาชิกอ่านประวัติ หัวหน้าเลือกอาจารย์/ส่ง/ยกเลิกpending หลังacceptedเปลี่ยนอาจารย์ไม่ได้
+- `/advisor/invitations`: advisorอ่านคำเชิญตน/ตอบรับ/ปฏิเสธ จากลิงก์ในหน้าบัญชี หลังrejected/cancelledไม่คืนliveProjectcontext บัญชีadvisorต้องให้ผู้ดูแลเตรียมก่อน ไม่เปิดrole signup
 - Session คงที่ 8 ชั่วโมง; โหลดหน้าใหม่และกลับมาโฟกัสหน้าจะตรวจ `/auth/me` อีกครั้ง เมื่อได้ 401 จึงกลับ Login ส่วน network/server error แสดงปุ่มลองใหม่
 
-ผู้ใช้เลือก **Feature-based**: routes อยู่ใน `src/app` ส่วน form, API client, session hook และ styles อยู่ใน `src/features/auth` ไม่มี token/password/user cache ใน localStorage หรือ sessionStorage ใช้ HttpOnly session cookie และอ่านเฉพาะ CSRF cookie สำหรับ Logout
+ผู้ใช้เลือก **Feature-based**: routesอยู่ในsrc/app ส่วนAuth/Team/Project/Invitationsอยู่ในsrc/features/auth, teams, projects, advisor-invitations ไม่มีtoken/password/user/team/Project/invitation cacheในlocalStorage/sessionStorage ใช้HttpOnly sessioncookie อ่านเฉพาะCSRFcookieสำหรับwrite requestsที่ต้องใช้
 
 ## เปิดในเครื่อง
 
@@ -44,8 +50,8 @@ npm run test:e2e
 
 Browser tests ใช้ Microsoft Edge ที่ติดตั้งในเครื่องและ Playwright 1.65.0 ต้องให้ ports **3000 และ 8001 ว่าง** ชุดทดสอบเปิด Frontend บน 3000 โดย override API ไป fixture 8001 เฉพาะ process ทดสอบ ไม่ใช้ Backend ปกติ 8000 และบล็อก Auth requests ที่ออกนอก 8001
 
-Fixture ใช้ direct project_app connection ไป `student_project_management_v1_test` และ outer rollback-only transaction ทุก request ใช้ savepoint ไม่เปลี่ยน SQL/grants/roles ก่อน/หลังทดสอบตรวจ metadata/ACL/row counts และไม่มี fixture connection ค้าง ไม่รวมค่า identity sequences ที่อาจขยับแม้ ROLLBACK การอ่าน baseline ใช้ private DB config เดิมใน read-only transaction ไม่มีการพิมพ์ secrets
+Fixtureใช้student_project_management_v1_testและouterrollback-onlytransactionทุกrequestเป็นsavepoint เวอร์ชันคำเชิญเปิดexplicitowner-fixturemodeเฉพาะtestprocess เพื่อเตรียมadvisor2/coordinator1ด้วยproject_ownerที่ไม่ใช่superuser แล้วswitchเป็นeffectiveproject_appก่อนserveHTTPทั้งหมด Runtime8000ยังใช้directproject_appตามเดิม ไม่มีadminfallback ดู [roleboundary](../docs/progress/ADVISOR_INVITATIONS_IMPLEMENTATION_REPORT.md) ก่อนรัน ใช้npm runnerเพื่อได้uniquetag ไม่เรียกPlaywrightตรงสำหรับsuiteนี้ ก่อน/หลังตรวจmetadata/ACL/rowcountsและfixtureconnections=0 ไม่รวมidentitysequencesที่ROLLBACKไม่คืน ไม่พิมพ์secrets
 
-ผลล่าสุด **2026-11-07**: lint/TypeScript/build PASS, Browser **5/5 PASS**, baseline หลัง ROLLBACK PASS ภาพ Desktop/Mobile อยู่ใน `test-results` ที่ Git ignore; ปิด traces เพื่อไม่เก็บ session tokens ใน trace artifacts อย่าเปิด normal dev server พร้อม Browser suite บน port เดียวกัน
+ผลล่าสุด **2026-11-07**: lint/TypeScript/build PASS, Browser **42/42 PASS** (Auth5+Team8+member8+Project9+invitation12), baselineหลังROLLBACK PASS เก็บข้อมูลเดิมไว้ ภาพDesktop/Mobileอยู่ในignoredtest-results ปิดtracesเพื่อไม่เก็บsessiontokens อย่าเปิดnormaldevพร้อมBrowser suiteบนportเดียวกัน Backend174tests/direct app boundary smokeผ่าน ดู [Invitations Report](../docs/progress/ADVISOR_INVITATIONS_IMPLEMENTATION_REPORT.md)
 
-ยังไม่ครอบคลุม Team/Project, multi-session concurrency, HTTPS/LAN/deployment, admin provisioning หรือ password recovery อ่านสถานะต่อใน [Backlog](../docs/progress/BACKLOG.md) และ [Auth Contract](../docs/api/AUTH_CONTRACT.md)
+ยังไม่ครอบคลุมออก/ถอดสมาชิก/โอนหัวหน้า/Project update/submission, multi-session concurrency, HTTPS/LAN/deployment, admin provisioning/password recoveryหรือsuccessful runtime dataCOMMIT หากGETผิดพลาดที่ไม่ตรงContractจะแสดงretryและไม่เปิดformสร้าง POSTไม่retryอัตโนมัติ เมื่อไม่ทราบผลให้ตรวจข้อมูลผ่านGET อ่าน [Backlog](../docs/progress/BACKLOG.md), [Auth Contract](../docs/api/AUTH_CONTRACT.md), [Invitations Contract](../docs/api/ADVISOR_INVITATIONS_CONTRACT.md)

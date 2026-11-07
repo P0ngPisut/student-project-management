@@ -1,28 +1,19 @@
-"""Read-only PostgreSQL environment check for Student Project Management V1.
+"""Read-only PostgreSQL preflight pinned to the V1 test database.
 
-Run from the repository root:
-    python -B -m database.tools.Database_Schema_V1_Readonly_Preflight
-
-This script performs SELECT only. It never prints DB_PASSWORD or connection URLs.
-It uses the backend engine and does NOT pin the test database; see database/README.md.
+Run: python -B -m database.tools.Database_Schema_V1_Readonly_Preflight
+Never imports backend.database, reads DB_NAME as a target, or writes to DB.
 """
 
-from __future__ import annotations
-
-import sys
 from pathlib import Path
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
+import sys
+
+from psycopg.rows import dict_row
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-try:
-    from backend.database import engine
-except ImportError as exc:
-    print("Cannot import backend.database. Run from the repository root with the backend venv active.")
-    raise SystemExit(1) from exc
+from database.tools.Test_Database import connect_test_database, TEST_DB
 
 EXPECTED_TABLES = (
     "users", "teams", "team_members", "projects", "advisor_invitations",
@@ -32,70 +23,52 @@ EXPECTED_TABLES = (
 )
 
 
-def main() -> int:
+def main():
+    conn = None
     try:
-        with engine.connect() as connection:
-            env = connection.execute(text("""
-                SELECT current_database() AS db_name,
-                       current_user AS connected_role,
-                       current_setting('server_version') AS pg_version,
-                       (SELECT pg_get_userbyid(datdba)
-                          FROM pg_database WHERE datname = current_database()) AS db_owner
-            """)).mappings().one()
-
-            print("=== PostgreSQL V1 READ-ONLY PREFLIGHT ===")
-            print("Database:", env["db_name"])
-            print("Connected role:", env["connected_role"])
-            print("Database owner:", env["db_owner"])
-            print("PostgreSQL version:", env["pg_version"])
-
-            roles = connection.execute(text("""
-                SELECT rolname, rolcanlogin, rolsuper, rolcreatedb,
-                       rolcreaterole, rolbypassrls
-                  FROM pg_roles
-                 WHERE rolname NOT LIKE 'pg_%'
-                 ORDER BY rolname
-            """)).mappings().all()
-            print("\nExisting user-defined roles:")
-            for r in roles:
-                flags = [name for name, key in (
-                    ("LOGIN", "rolcanlogin"), ("SUPERUSER", "rolsuper"),
-                    ("CREATEDB", "rolcreatedb"), ("CREATEROLE", "rolcreaterole"),
-                    ("BYPASSRLS", "rolbypassrls"),
-                ) if r[key]]
-                print(" -", r["rolname"], "[" + ", ".join(flags or ["no elevated flags"]) + "]")
-
-            tables = connection.execute(text("""
-                SELECT tablename, tableowner
-                  FROM pg_tables
-                 WHERE schemaname = 'public'
-                 ORDER BY tablename
-            """)).mappings().all()
-            print("\nPublic tables:", len(tables))
-            found = set()
+        conn = connect_test_database(readonly=True)
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("""SELECT current_database() AS db_name,
+                current_user AS connected_role,
+                current_setting('server_version') AS pg_version,
+                (SELECT pg_get_userbyid(datdba) FROM pg_database
+                 WHERE datname=current_database()) AS db_owner,
+                current_setting('transaction_read_only') AS readonly""")
+            env = cur.fetchone()
+            if env["db_name"] != TEST_DB or env["readonly"] != "on":
+                raise RuntimeError("Read-only test-database guard failed")
+            print("=== TEST DATABASE READ-ONLY PREFLIGHT ===")
+            for name in ("db_name", "connected_role", "db_owner", "pg_version", "readonly"):
+                print(name + ":", env[name])
+            cur.execute("""SELECT rolname,rolcanlogin,rolsuper,rolcreatedb,
+                rolcreaterole,rolbypassrls FROM pg_roles
+                WHERE rolname IN ('postgres','project_owner','project_app')
+                ORDER BY rolname""")
+            print("Roles (login/superuser/createdb/createrole/bypassrls):")
+            for row in cur.fetchall():
+                print(" -", row["rolname"], *(row[key] for key in (
+                    "rolcanlogin","rolsuper","rolcreatedb","rolcreaterole","rolbypassrls")))
+                if row["rolname"] == env["connected_role"] and row["rolsuper"]:
+                    print("   Inventory login only; never use this superuser for application workflows.")
+            cur.execute("""SELECT tablename,tableowner FROM pg_tables
+                WHERE schemaname='public' ORDER BY tablename""")
+            tables = cur.fetchall()
+            found = {row["tablename"] for row in tables}
+            print("Public tables:", len(tables))
             for row in tables:
                 print(" -", row["tablename"], "owner=", row["tableowner"])
-                found.add(row["tablename"])
-            missing = sorted(set(EXPECTED_TABLES) - found)
-            print("V1 expected tables present:", len(EXPECTED_TABLES) - len(missing), "/", len(EXPECTED_TABLES))
-            if missing:
-                print("V1 tables not yet created:", ", ".join(missing))
-
-            connected = next((r for r in roles if r["rolname"] == env["connected_role"]), None)
-            if connected and connected["rolsuper"]:
-                print("\nSECURITY NOTE: connected role is SUPERUSER. Do not use it as the production FastAPI role.")
-            if not tables:
-                print("NEXT: prepare a DIFFERENT test database for V1 SQL experiments; do not execute the draft in the existing database.")
-            else:
-                print("NEXT: inspect existing objects and take a backup before any future schema changes.")
-            print("\nRead-only check completed. No DB changes were made.")
+            print("V1 expected tables:", len(set(EXPECTED_TABLES) & found), "/", len(EXPECTED_TABLES))
+            print("Missing tables:", sorted(set(EXPECTED_TABLES) - found))
+            print("Read-only inventory only; not proof that all V1 workflows pass.")
         return 0
-    except SQLAlchemyError as exc:
-        # Do not leak credential-bearing connection string via exception output.
-        print("PostgreSQL connection or read-only query failed:", exc.__class__.__name__)
-        print("Check that PostgreSQL is running, the backend venv is active, and backend/.env is configured.")
+    except Exception as exc:
+        print("Preflight failed:", type(exc).__name__, "sqlstate=", getattr(exc, "sqlstate", None))
         return 2
+    finally:
+        if conn is not None:
+            conn.rollback()
+            conn.close()
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

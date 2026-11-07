@@ -1,6 +1,6 @@
 """Install the reviewed V1 draft ONLY into the existing empty V1 test database.
 
-Run in the project root with backend/.env and backend/database.py:
+Run in the project root with private backend/.env deployment credentials:
     python -B -m database.tools.Database_Schema_V1_Test_Install_Only
 
 This is a deliberate COMMIT (unlike the earlier dry run). It does not edit
@@ -19,7 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.database import database_url
+from database.tools.Test_Database import connect_test_database
 
 TEST_DATABASE = "student_project_management_v1_test"
 MAIN_DATABASE = "student_project_management"
@@ -54,14 +54,7 @@ def main() -> int:
     conn = None
     committed = False
     try:
-        conn = psycopg.connect(
-            host=database_url.host,
-            port=database_url.port or 5432,
-            dbname=TEST_DATABASE,  # never use the main DB from .env
-            user=database_url.username,
-            password=database_url.password,
-            autocommit=False,
-        )
+        conn = connect_test_database()
         with conn.cursor() as cur:
             cur.execute("SELECT current_database(), session_user")
             db, login = cur.fetchone()

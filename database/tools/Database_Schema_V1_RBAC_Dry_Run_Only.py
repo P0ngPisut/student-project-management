@@ -21,7 +21,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.database import database_url
+from database.tools.Test_Database import connect_test_database
 
 TEST_DB = "student_project_management_v1_test"
 OWNER_ROLE = "project_owner"
@@ -80,14 +80,7 @@ def main() -> int:
         print(f"ERROR: RBAC template file is missing: {TEMPLATE.name}")
         return 1
 
-    with psycopg.connect(
-        host=database_url.host,
-        port=database_url.port or 5432,
-        dbname=TEST_DB,
-        user=database_url.username,
-        password=database_url.password,
-        autocommit=True,
-    ) as conn:
+    with connect_test_database(autocommit=True) as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT current_database(), current_user")
             db_name, login = cur.fetchone()

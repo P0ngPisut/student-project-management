@@ -1,5 +1,7 @@
 # Database Schema V1 — จุดเริ่มต้นใช้งาน
 
+**สมาชิกทีมเครื่องใหม่:** ใช้ [Database Setup](../docs/team/DATABASE_SETUP.md) และ [Local Setup](../docs/team/LOCAL_SETUP.md) ก่อนเลือกscript ตารางด้านล่างมีทั้งread-only/ROLLBACK/COMMITและไม่ได้อนุมัติให้รันทุกตัวต่อกันบนDBที่ติดตั้งแล้ว
+
 ปรับโครงสร้างไฟล์วันที่ 2026-11-06 ตามขอบเขตที่อนุมัติ: ย้ายไฟล์และปรับ path/import เท่านั้น ไม่มีการเปลี่ยน SQL, Business Rules, Backend, Frontend หรือฐานข้อมูล
 
 ## ตำแหน่งไฟล์
@@ -8,8 +10,9 @@
 |---|---|
 | [schema](schema/) | SQL Schema และ RBAC ต้นฉบับ 2 ไฟล์ |
 | [auth](auth/) | SQL review ส่วนขยาย Login 2 ไฟล์; ติดตั้งถาวรใน test DB แล้วผ่าน Auth_Install; SQL review ต้นฉบับยังจบ ROLLBACK |
+| [migrations](migrations/) | SQL review แก้ existing V1 baseline; ไฟล์จบ ROLLBACK แต่ติดตั้งผ่าน approved installer แล้ว |
 | [tests](tests/) | Static Gate, RBAC Lock Regression, Workflow Regression และ Auth Regression |
-| [tools](tools/) | Preflight, Dry Run และเครื่องมือติดตั้ง 5 ไฟล์ |
+| [tools](tools/) | Preflight/Dry Run/initial install, Auth_Install, shared test connection และ V1_Baseline_Prepare |
 | [docs/database](../docs/database/) | Data Dictionary, Review Report และข้อกำหนดอ้างอิงล่าสุด |
 | [docs/progress](../docs/progress/) | Backlog และแบบรายงานความคืบหน้า |
 
@@ -36,11 +39,15 @@
 | [Workflow_Regression.py](tests/Database_Schema_V1_Workflow_Regression.py) | แพตช์ 6 ฟังก์ชัน, RBAC และ fixture ชั่วคราว แล้ว ROLLBACK | ใช้ test DB เท่านั้น; ล่าสุดผ่าน 57 กรณีในรอบก่อนย้ายไฟล์ |
 | [Auth_Regression.py](tests/Auth_Regression.py) | Validate installed Auth หรือสร้างชั่วคราวเมื่อไม่มี; fixtures ทุกกรณี ROLLBACK | PASS 40/40 ทั้งก่อน/หลังติดตั้ง; ไม่ patch V1 |
 | [Auth_Install.py](tools/Auth_Install.py) | default dry-run/verify; --apply **COMMIT Auth DDL/grants**; --check-runtime read-only | ใช้ test DB เท่านั้น; ไม่สร้างบัญชี/session fixture หรือเปลี่ยน role/password |
+| [Auth_Provision_Advisor.py](tools/Auth_Provision_Advisor.py) | --check read-only; defaultDRY_RUN/ROLLBACK; --apply+confirmDBบันทึกadvisorใหม่1บัญชี | hiddenTTYpassword ไม่แก้บัญชีเดิม/Schema/grants; บันทึก1บัญชีตามอนุมัติแล้ว ดู [คู่มือและผลทดสอบ](../docs/database/ADVISOR_ACCOUNT_PROVISIONING.md) |
 | [Dry_Run_Only.py](tools/Database_Schema_V1_Dry_Run_Only.py) | สร้าง Schema ชั่วคราวแล้ว ROLLBACK | ต้องเป็น test schema ว่าง ไม่ใช่เครื่องมืออัปเดต DB ที่มีตารางแล้ว |
 | [Test_Install_Only.py](tools/Database_Schema_V1_Test_Install_Only.py) | **COMMIT Schema** | ต้องเป็น test schema ว่างและได้รับอนุญาตติดตั้งโดยเฉพาะ |
 | [RBAC_Dry_Run_Only.py](tools/Database_Schema_V1_RBAC_Dry_Run_Only.py) | ทดลองสิทธิ์แล้ว ROLLBACK | ตรวจ baseline ก่อนติดตั้งสิทธิ์; ปฏิเสธกรณี app มี SELECT แล้ว |
 | [RBAC_Test_Apply_Only.py](tools/Database_Schema_V1_RBAC_Test_Apply_Only.py) | **COMMIT สิทธิ์** | ติดตั้ง RBAC ครั้งแรกตามเงื่อนไขสคริปต์; ต้องอนุญาตโดยเฉพาะ |
-| [Readonly_Preflight.py](tools/Database_Schema_V1_Readonly_Preflight.py) | SELECT ผ่าน backend engine | **ยังไม่บังคับ test DB**: ห้ามใช้ในงาน test-only จนแก้ guard ในงานที่อนุมัติแยก |
+| [Readonly_Preflight.py](tools/Database_Schema_V1_Readonly_Preflight.py) | read-only และ ROLLBACK | ปรับแล้ว: pin test DB ผ่าน Test_Database ไม่ import backend engine |
+| [V1_Baseline_Prepare.py](tools/V1_Baseline_Prepare.py) | default/--check read-only; --test-installed ทดสอบโดยไม่ patch; --rehearse สำหรับ legacy51 เท่านั้น | fixtures ROLLBACK; --workflow เรียกชุด57เดิมใน transaction เดียว |
+| [V1_Baseline_Install.py](tools/V1_Baseline_Install.py) | default read-only; --apply COMMIT เฉพาะ approved existing-baseline repair | ติดตั้งแล้ว52functions ไม่เขียนทับของที่ถูกต้อง ดู [ผลติดตั้ง](../docs/database/V1_BASELINE_INSTALLATION_REPORT.md) |
+| [Team_Create_Installed_Regression.py](tests/Team_Create_Installed_Regression.py) | direct project_app; ไม่มี DDL/grants/SET ROLE owner; ROLLBACK fixtures | PASS8 บน installed baseline ไม่ใช่ Team HTTP API |
 
 เมื่อมีขอบเขตอนุญาตให้ทดสอบ DB จึงเรียกชุด regression เช่น:
 
@@ -100,4 +107,19 @@ PASS 57 tests = validation 17 + hash/token/config 16 + HTTP/PostgreSQL 24 แย
 
 คำสั่งแรก verify installed baseline หรือ dry-run หากยังไม่มี Auth คำสั่งที่สองเชื่อมโดยตรงด้วย AUTH_DB_PASSWORD ของ project_app ใน read-only transaction ไม่พิมพ์ secrets/URL หลังผู้ใช้ตั้งค่าแล้วผลเป็น PASS/RUNTIME_APP_READONLY_VERIFIED และ smoke Register/Login/Logout ด้วย direct app connection ผ่านพร้อม ROLLBACK รวม live TCP unknown Login=401 ดู Installation Report Backend GET/Swagger เปิดที่ localhost:8000 แล้ว
 
-Auth_Install --apply ใช้เฉพาะงานติดตั้งที่อยู่ในขอบเขตอนุมัติ ไม่ใช่คำสั่ง test และไม่แทนตัวติดตั้งแพตช์ V1 P06 ซึ่งยังขาด v1_lock_team ใน persistent baseline
+Auth_Install --apply ใช้เฉพาะงานติดตั้งAuthที่อยู่ในขอบเขตอนุมัติ ไม่ใช่คำสั่ง test และไม่แทน V1_Baseline_Install ซึ่งติดตั้งแพตช์ P06 ตามอนุมัติแล้ว
+
+## เตรียม Team DB — อัปเดต 2026-11-07
+
+Preflight/เครื่องมือ V1 ทั้ง5ตัวใช้ [Test_Database](tools/Test_Database.py) ซึ่ง ignore DB_NAME และ pin student_project_management_v1_test ก่อนตรวจ current_database ไม่ import backend.database หรือ fallback ไป main DB เอา guard เก่าที่บังคับ DB_NAME ไม่ใช่ test ออกจาก RBAC Apply แล้ว เงื่อนไข owner/empty schema/initial RBAC และคำยืนยัน COMMIT เดิมยังคงอยู่ ไม่ใช่ migration สำหรับ DB ที่มีข้อมูล
+
+ค่า SQL source/Auth เดิมไม่เปลี่ยน และ [.gitattributes](../.gitattributes) ให้ SQL คง LF เพื่อไม่ทำให้ pinned checksum เปลี่ยนบน Windows
+
+```powershell
+& .\backend\.venv\Scripts\python.exe -B -m database.tools.V1_Baseline_Prepare --check
+& .\backend\.venv\Scripts\python.exe -B -m database.tools.V1_Baseline_Prepare --test-installed --workflow
+& .\backend\.venv\Scripts\python.exe -B -m database.tests.Team_Create_Installed_Regression
+& .\backend\.venv\Scripts\python.exe -B -m unittest database.tests.test_test_database -q
+```
+
+ปัจจุบัน --check PASS หลังติดตั้ง52functions --test-installed ไม่ทำDDL/GRANTและคืน public/auth metadata/ACL/row counts หลัง ROLLBACK ไม่รวม identity sequences [SQL review](migrations/001_v1_baseline_repair_review.sql) ยังจบ ROLLBACK ตามเดิม ตัวติดตั้งแยกได้รับอนุมัติ COMMIT เฉพาะ6functionsและ EXECUTE helper1รายการแล้ว ไม่มีfixture/role/password changes ไม่ได้ทดสอบfresh installของเครื่องทีม อ่าน [ผลติดตั้ง](../docs/database/V1_BASELINE_INSTALLATION_REPORT.md) ก่อนใช้งาน

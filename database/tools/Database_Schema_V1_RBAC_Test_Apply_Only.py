@@ -19,7 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.database import database_url
+from database.tools.Test_Database import connect_test_database
 from database.tools.Database_Schema_V1_RBAC_Dry_Run_Only import (
     APP_ROLE, OWNER_ROLE, TEST_DB, TEMPLATE, EXPECTED_TABLES, render_rbacs
 )
@@ -29,17 +29,7 @@ def main() -> int:
     if not TEMPLATE.is_file():
         print(f"ERROR: Missing reviewed RBAC template: {TEMPLATE.name}")
         return 1
-    if database_url.database == TEST_DB:
-        print("ERROR: Backend's primary connection appears to target the test database; review .env before applying")
-        return 1
-    with psycopg.connect(
-        host=database_url.host,
-        port=database_url.port or 5432,
-        dbname=TEST_DB,
-        user=database_url.username,
-        password=database_url.password,
-        autocommit=True,
-    ) as conn:
+    with connect_test_database(autocommit=True) as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT current_database(), session_user, current_user")
             db, session_user, current_user = cur.fetchone()

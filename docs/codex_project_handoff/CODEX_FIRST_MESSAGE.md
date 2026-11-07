@@ -1,5 +1,7 @@
 # ข้อความเริ่มต้นสำหรับส่งให้ Codex ใน VS Code
 
+> สำหรับทีมรับงานSubmission/Milestoneปัจจุบัน อ่าน [Team Start Here](../team/START_HERE.md) ก่อน ข้อความread-onlyauditด้านล่างเป็นpromptประวัติ ไม่ใช่คำสั่งใหม่ที่แทนขอบเขตเจ้าของอนุมัติให้ทีมพัฒนาแล้ว
+
 > ประวัติ prompt เริ่มต้น: audit นี้ดำเนินการแล้ว สำหรับสถานะล่าสุดอ่าน [Reference](../database/SCHEMA_V1_REFERENCE.md) และ [Backlog](../progress/BACKLOG.md) ก่อน ขอบเขตคำสั่งผู้ใช้ล่าสุดมีผลเหนือคำสั่งเริ่มต้นด้านล่าง ไม่ถือว่าเอกสารนี้อนุมัติการแก้ไข/ติดตั้ง DB เพิ่มเติม
 
 โปรดอ่านเอกสาร `docs/codex_project_handoff/PROJECT_HANDOFF_CODEX.md` และไฟล์ต้นฉบับทั้ง 5 ไฟล์ใน `docs/codex_project_handoff/sources/` ให้ครบก่อน
