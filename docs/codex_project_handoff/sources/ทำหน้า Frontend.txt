@@ -1,0 +1,37 @@
+<badge color="success"><icon name="check-circle" inline size="xs"/> Project Setup สำเร็จสมบูรณ์</badge>
+
+จากภาพ Terminal ตรวจสอบได้ว่า **Next.js ผ่านการตรวจสอบทั้งสองขั้นตอนแล้ว**
+
+| รายการ | ผลลัพธ์ |
+|---|---|
+| `npm run lint` | <icon name="check" color="success" inline/> ผ่าน ไม่มี Error |
+| `npm run build` | <icon name="check" color="success" inline/> ผ่าน |
+| TypeScript | <icon name="check" color="success" inline/> ผ่าน |
+| Static Page Generation | <icon name="check" color="success" inline/> สำเร็จ 4/4 |
+| Development Server | <icon name="check" color="success" inline/> ทดสอบเปิดเว็บได้ก่อนหน้านี้ |
+
+**สรุป:** ขั้นตอนที่ 1 — Next.js Project Setup เสร็จเรียบร้อยแล้ว ไม่ต้องแก้ไขอะไรเพิ่มเติม
+
+## ขั้นตอนถัดไป — วางโครงสร้าง Frontend
+
+ก่อนสร้าง Folder Structure ขอให้ยืนยันแนวทางจัดโครงสร้างโปรเจกต์
+
+{@body const [choice,setChoice] = DIL.useState("feature")}
+<box border radius="lg" padding={3} gap={3}>
+  <radio-group direction="col" value={choice} onChange={setChoice}>
+    <radio value="feature">
+      **Feature-based Structure (แนะนำ)**
+
+      แยกตามฟังก์ชัน เช่น `projects`, `teams`, `milestones`, `tasks` เพื่อให้สมาชิกทำงานแยกส่วนได้
+    </radio>
+    <radio value="layer">
+      **Layer-based Structure**
+
+      แยกตามประเภทโค้ด เช่น `components`, `services`, `hooks`, `types`
+    </radio>
+    <radio value="compare">
+      **ขอเปรียบเทียบก่อนตัดสินใจ**
+    </radio>
+  </radio-group>
+  <button block onClick={()=>GenUI.issueNewTurn(choice==="feature"?"เลือก Feature-based Structure ช่วยแนะนำขั้นตอนสร้างโครงสร้าง Frontend โดยยังไม่แก้ UI หรือเพิ่มฟังก์ชัน":choice==="layer"?"เลือก Layer-based Structure ช่วยแนะนำขั้นตอนสร้างโครงสร้าง Frontend โดยยังไม่แก้ UI หรือเพิ่มฟังก์ชัน":"ช่วยเปรียบเทียบ Feature-based กับ Layer-based Structure ก่อนตัดสินใจ")}>ยืนยันและดำเนินการต่อ</button>
+</box>
